@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pumping Lemma Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .string-display {
+            font-size: 24px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        .section {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        #xyz {
+            background-color: #f0f0f0;
+        }
+        #x { color: #2196F3; }
+        #y { color: #4CAF50; }
+        #z { color: #FF9800; }
+        input[type="number"] {
+            width: 60px;
+        }
+        select {
+            padding: 5px;
+            margin: 5px;
+        }
+        .explanation {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pumping Lemma Visualizer</h1>
+    
+    <div class="controls">
+        <label>Input string pattern: </label>
+        <input type="text" id="pattern" value="a" placeholder="e.g., a">
+        <label>Length (n): </label>
+        <input type="number" id="length" value="5" min="1">
+        <button onclick="generateString()">Generate</button>
+        <br><br>
+        <label>Language Pattern: </label>
+        <select id="languagePattern">
+            <option value="a^n">a^n (Regular)</option>
+            <option value="a^nb^n">a^nb^n (Not Regular)</option>
+            <option value="a^nb^nc^n">a^nb^nc^n (Not Regular)</option>
+            <option value="palindrome">Palindromes (Not Regular)</option>
+            <option value="custom">Custom</option>
+        </select>
+    </div>
+
+    <div class="section" id="xyz">
+        <h2>String Decomposition</h2>
+        <div class="string-display">
+            <span id="x"></span><span id="y"></span><span id="z"></span>
+        </div>
+        <div id="regularityCheck"></div>
+    </div>
+
+    <div class="controls">
+        <label>Pump y times: </label>
+        <input type="number" id="pumpTimes" value="1" min="0">
+        <button onclick="pumpString()">Pump!</button>
+    </div>
+
+    <div class="section">
+        <h2>Pumped String</h2>
+        <div class="string-display" id="pumpedString"></div>
+    </div>
+
+    <div class="explanation">
+        <h3>About the Pumping Lemma</h3>
+        <p>The pumping lemma states that for every regular language L, there exists a pumping length p where any string s in L with |s| ≥ p can be divided into three parts (s = xyz) such that:</p>
+        <ol>
+            <li>|y| > 0</li>
+            <li>|xy| ≤ p</li>
+            <li>For all i ≥ 0, xy<sup>i</sup>z is in L</li>
+        </ol>
+        <p>If a language violates any of these conditions, it is not regular.</p>
+    </div>
+
+    <script>
+        let currentX = '';
+        let currentY = '';
+        let currentZ = '';
+
+        function generateString() {
+            const pattern = document.getElementById('pattern').value;
+            const length = parseInt(document.getElementById('length').value);
+            const languagePattern = document.getElementById('languagePattern').value;
+            
+            let fullString = '';
+            
+            // Generate string based on selected language pattern
+            switch(languagePattern) {
+                case 'a^nb^n':
+                    fullString = 'a'.repeat(length) + 'b'.repeat(length);
+                    break;
+                case 'a^nb^nc^n':
+                    fullString = 'a'.repeat(length) + 'b'.repeat(length) + 'c'.repeat(length);
+                    break;
+                case 'palindrome':
+                    const half = pattern.repeat(Math.floor(length/2));
+                    fullString = half + (length % 2 === 1 ? pattern : '') + half.split('').reverse().join('');
+                    break;
+                default:
+                    fullString = pattern.repeat(length);
+            }
+            
+            // Split into x, y, z (simple example: y is middle third)
+            const splitPoint1 = Math.floor(fullString.length / 3);
+            const splitPoint2 = Math.floor(2 * fullString.length / 3);
+            
+            currentX = fullString.substring(0, splitPoint1);
+            currentY = fullString.substring(splitPoint1, splitPoint2);
+            currentZ = fullString.substring(splitPoint2);
+            
+            updateDisplay();
+        }
+
+        function isInLanguage(str) {
+            const pattern = document.getElementById('languagePattern').value;
+            
+            switch(pattern) {
+                case 'a^n':
+                    return /^a+$/.test(str);
+                case 'a^nb^n':
+                    const aCount = (str.match(/a/g) || []).length;
+                    const bCount = (str.match(/b/g) || []).length;
+                    return /^a+b+$/.test(str) && aCount === bCount;
+                case 'a^nb^nc^n':
+                    const aCount3 = (str.match(/a/g) || []).length;
+                    const bCount3 = (str.match(/b/g) || []).length;
+                    const cCount3 = (str.match(/c/g) || []).length;
+                    return /^a+b+c+$/.test(str) && aCount3 === bCount3 && bCount3 === cCount3;
+                case 'palindrome':
+                    return str === str.split('').reverse().join('');
+                case 'custom':
+                    // Add your custom language check here
+                    return true;
+                default:
+                    return true;
+            }
+        }
+
+        function pumpString() {
+            const i = parseInt(document.getElementById('pumpTimes').value);
+            const pumpedString = currentX + currentY.repeat(i) + currentZ;
+            document.getElementById('pumpedString').textContent = pumpedString;
+            
+            // Check if pumped string is in the language
+            const isRegular = isInLanguage(pumpedString);
+            const regularityDiv = document.getElementById('regularityCheck');
+            
+            if (isRegular) {
+                regularityDiv.innerHTML = `<p style="color: green">The pumped string is still in the language!</p>`;
+            } else {
+                regularityDiv.innerHTML = `<p style="color: red">The pumped string is NOT in the language. This suggests the language might not be regular!</p>`;
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('x').textContent = currentX;
+            document.getElementById('y').textContent = currentY;
+            document.getElementById('z').textContent = currentZ;
+            document.getElementById('pumpedString').textContent = currentX + currentY + currentZ;
+            // Clear regularity check when generating new string
+            document.getElementById('regularityCheck').innerHTML = '';
+        }
+
+        // Initialize on load
+        generateString();
+    </script>
+</body>
+</html>
