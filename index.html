@@ -49,15 +49,16 @@
     <h1>Pumping Lemma Visualizer</h1>
     
     <div class="controls">
-        <label>Input string pattern: </label>
-        <input type="text" id="pattern" value="a" placeholder="e.g., a">
         <label>Length (n): </label>
         <input type="number" id="length" value="5" min="1">
+        <label>Length (m): </label>
+        <input type="number" id="lengthM" value="5" min="1">
         <button onclick="generateString()">Generate</button>
         <br><br>
         <label>Language Pattern: </label>
         <select id="languagePattern">
             <option value="a^n">a^n (Regular)</option>
+            <option value="a^nb^m">a^nb^m (Regular)</option>
             <option value="a^nb^n">a^nb^n (Not Regular)</option>
             <option value="a^nb^nc^n">a^nb^nc^n (Not Regular)</option>
             <option value="palindrome">Palindromes (Not Regular)</option>
@@ -101,8 +102,8 @@
         let currentZ = '';
 
         function generateString() {
-            const pattern = document.getElementById('pattern').value;
             const length = parseInt(document.getElementById('length').value);
+            const lengthM = parseInt(document.getElementById('lengthM').value);
             const languagePattern = document.getElementById('languagePattern').value;
             
             let fullString = '';
@@ -116,11 +117,14 @@
                     fullString = 'a'.repeat(length) + 'b'.repeat(length) + 'c'.repeat(length);
                     break;
                 case 'palindrome':
-                    const half = pattern.repeat(Math.floor(length/2));
-                    fullString = half + (length % 2 === 1 ? pattern : '') + half.split('').reverse().join('');
+                    const half = 'a'.repeat(Math.floor(length/2));
+                    fullString = half + (length % 2 === 1 ? 'a' : '') + half.split('').reverse().join('');
+                    break;
+                case 'a^nb^m':
+                    fullString = 'a'.repeat(length) + 'b'.repeat(lengthM);
                     break;
                 default:
-                    fullString = pattern.repeat(length);
+                    fullString = 'a'.repeat(length);
             }
             
             // Split into x, y, z (simple example: y is middle third)
