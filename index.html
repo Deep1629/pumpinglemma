@@ -61,8 +61,6 @@
             <option value="a^nb^m">a^nb^m (Regular)</option>
             <option value="a^nb^n">a^nb^n (Not Regular)</option>
             <option value="a^nb^nc^n">a^nb^nc^n (Not Regular)</option>
-            <option value="palindrome">Palindromes (Not Regular)</option>
-            <option value="custom">Custom</option>
         </select>
     </div>
 
@@ -116,10 +114,6 @@
                 case 'a^nb^nc^n':
                     fullString = 'a'.repeat(length) + 'b'.repeat(length) + 'c'.repeat(length);
                     break;
-                case 'palindrome':
-                    const half = 'a'.repeat(Math.floor(length/2));
-                    fullString = half + (length % 2 === 1 ? 'a' : '') + half.split('').reverse().join('');
-                    break;
                 case 'a^nb^m':
                     fullString = 'a'.repeat(length) + 'b'.repeat(lengthM);
                     break;
@@ -153,11 +147,6 @@
                     const bCount3 = (str.match(/b/g) || []).length;
                     const cCount3 = (str.match(/c/g) || []).length;
                     return /^a+b+c+$/.test(str) && aCount3 === bCount3 && bCount3 === cCount3;
-                case 'palindrome':
-                    return str === str.split('').reverse().join('');
-                case 'custom':
-                    // Add your custom language check here
-                    return true;
                 default:
                     return true;
             }
@@ -193,3 +182,4 @@
     </script>
 </body>
 </html>
+
